@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fire Department — Maintenance Log</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --red: #C0392B; --red-light: #FDEDEC; --red-mid: #E74C3C;
+      --amber: #E67E22; --amber-light: #FEF9E7;
+      --blue: #2471A3; --blue-light: #EBF5FB;
+      --gray: #566573; --gray-light: #F4F6F7;
+      --green: #1E8449; --green-light: #EAFAF1;
+      --navy: #1a1a2e; --navy-mid: #2c2c4a;
+      --border: #E5E8EC; --text: #1a1a2e; --text-muted: #7f8c8d;
+      --bg: #F7F8FA; --white: #ffffff;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08); --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+      --radius: 10px; --font: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
+    }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; line-height: 1.5; }
+
+    /* ── LOCK ── */
+    #lock-screen { position: fixed; inset: 0; background: var(--navy); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .lock-box { background: var(--white); border-radius: 16px; padding: 40px 36px; width: 100%; max-width: 360px; text-align: center; box-shadow: var(--shadow-md); }
+    .lock-icon { width: 56px; height: 56px; background: var(--red-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 24px; }
+    .lock-title { font-size: 20px; font-weight: 600; margin-bottom: 2px; }
+    .lock-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+    .lock-input { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius); font-family: var(--mono); font-size: 15px; letter-spacing: 3px; color: var(--text); outline: none; transition: border-color 0.2s; margin-bottom: 12px; }
+    .lock-input:focus { border-color: var(--red); }
+    .lock-input.error { border-color: var(--red-mid); background: var(--red-light); }
+    .lock-btn { width: 100%; padding: 11px; background: var(--red); color: white; border: none; border-radius: var(--radius); font-family: var(--font); font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+    .lock-btn:hover { background: #a93226; }
+    .lock-error { font-size: 12px; color: var(--red-mid); margin-top: 8px; min-height: 16px; }
+
+    /* ── PAGES ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── HOME ── */
+    #home { max-width: 900px; margin: 0 auto; padding: 36px 20px 60px; }
+    .home-header { margin-bottom: 36px; }
+    .home-title { font-size: 26px; font-weight: 600; }
+    .home-sub { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+    .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px; }
+    .tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 36px; }
+    .tile {
+      background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px 18px; cursor: pointer; transition: all 0.15s; box-shadow: var(--shadow);
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .tile:hover { box-shadow: var(--shadow-md); border-color: #ccc; transform: translateY(-1px); }
+    .tile-icon { font-size: 26px; margin-bottom: 4px; }
+    .tile-name { font-size: 15px; font-weight: 600; color: var(--text); }
+    .tile-type { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .tile-count { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .tile-count span { font-weight: 600; color: var(--red); }
+    .tile.station { border-left: 3px solid var(--blue); }
+    .tile.vehicle { border-left: 3px solid var(--red); }
+
+    /* ── LOG PAGE ── */
+    #log-page { max-width: 860px; margin: 0 auto; padding: 28px 20px 60px; }
+    .log-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; gap: 12px; }
+    .log-title-wrap { display: flex; align-items: center; gap: 12px; }
+    .back-btn { background: transparent; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 7px 12px; font-family: var(--font); font-size: 13px; color: var(--text-muted); cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
+    .back-btn:hover { background: var(--gray-light); color: var(--text); }
+    .log-title { font-size: 20px; font-weight: 600; }
+    .log-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+    .log-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+    .sync-status { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+    .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; flex-shrink: 0; }
+    .sync-dot.ok { background: var(--green); }
+    .sync-dot.saving { background: var(--amber); }
+    .sync-dot.error { background: var(--red); }
+
+    /* ── BUTTONS ── */
+    .btn { padding: 8px 15px; border-radius: var(--radius); font-family: var(--font); font-size: 13px; font-weight: 500; cursor: pointer; border: 1.5px solid var(--border); background: var(--white); color: var(--text); transition: all 0.15s; }
+    .btn:hover { background: var(--gray-light); }
+    .btn-primary { background: var(--red); color: white; border-color: var(--red); }
+    .btn-primary:hover { background: #a93226; border-color: #a93226; }
+    .btn-ghost { background: transparent; border-color: var(--border); color: var(--text-muted); }
+    .btn-ghost:hover { background: var(--gray-light); color: var(--text); }
+
+    /* ── STATS ── */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
+    .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); }
+    .stat-num { font-size: 26px; font-weight: 600; color: var(--text); line-height: 1; }
+    .stat-num.red { color: var(--red); }
+    .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ── FORM ── */
+    .form-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 18px; box-shadow: var(--shadow); display: none; }
+    .form-card.open { display: block; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-group input, .form-group select, .form-group textarea { padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-family: var(--font); font-size: 13px; color: var(--text); background: var(--white); outline: none; transition: border-color 0.2s; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--red); }
+    .form-group textarea { resize: vertical; min-height: 72px; }
+    .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+
+    /* ── FILTERS ── */
+    .filter-row { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+    .filter-chip { padding: 5px 13px; border-radius: 99px; border: 1.5px solid var(--border); background: var(--white); font-family: var(--font); font-size: 12px; color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
+    .filter-chip:hover { border-color: #bbb; color: var(--text); }
+    .filter-chip.active { background: var(--text); color: white; border-color: var(--text); }
+
+    /* ── ISSUES ── */
+    .issue-list { display: flex; flex-direction: column; gap: 10px; }
+    .issue-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); transition: box-shadow 0.15s; }
+    .issue-card:hover { box-shadow: var(--shadow-md); }
+    .issue-card.oos { border-left: 3px solid var(--red); }
+    .issue-card.resolved { opacity: 0.55; }
+    .issue-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .issue-desc { font-size: 14px; font-weight: 500; color: var(--text); flex: 1; }
+    .badges { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+    .badge { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 99px; }
+    .badge-oos { background: var(--red-light); color: var(--red); }
+    .badge-high { background: var(--amber-light); color: var(--amber); }
+    .badge-medium { background: var(--blue-light); color: var(--blue); }
+    .badge-low { background: var(--gray-light); color: var(--gray); }
+    .badge-open { background: var(--amber-light); color: var(--amber); }
+    .badge-resolved { background: var(--green-light); color: var(--green); }
+    .issue-meta { font-size: 12px; color: var(--text-muted); margin-top: 6px; font-family: var(--mono); }
+    .issue-actions { display: flex; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .act-btn { font-size: 11px; font-weight: 500; padding: 4px 11px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; font-family: var(--font); transition: all 0.15s; }
+    .act-btn:hover { background: var(--gray-light); color: var(--text); }
+    .act-btn.danger { color: var(--red); border-color: #f5c6c6; }
+    .act-btn.danger:hover { background: var(--red-light); }
+
+    .empty { text-align: center; padding: 48px 20px; color: var(--text-muted); font-size: 14px; background: var(--white); border: 1px dashed var(--border); border-radius: var(--radius); }
+    .empty-icon { font-size: 32px; margin-bottom: 10px; }
+    .loading { text-align: center; padding: 48px 20px; color: var(--text-muted); font-size: 14px; }
+    .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--red); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── PRINT ── */
+    #print-section { display: none; }
+    @media print {
+      body { background: white; font-family: Arial, sans-serif; font-size: 13px; color: #111; }
+      #lock-screen, #home, #log-page { display: none !important; }
+      #print-section { display: block !important; }
+      td { padding: 8px 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+      @page { margin: 2cm; }
+    }
+
+    @media (max-width: 620px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .form-row { grid-template-columns: 1fr; }
+      .log-header { flex-direction: column; gap: 10px; }
+      .log-actions { width: 100%; justify-content: flex-end; }
+      .tile-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOCK -->
+<div id="lock-screen">
+  <div class="lock-box">
+    <div class="lock-icon">🚒</div>
+    <div class="lock-title">Fire Department</div>
+    <div class="lock-sub">Maintenance Log System</div>
+    <input type="password" class="lock-input" id="pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')unlock()">
+    <button class="lock-btn" onclick="unlock()">Unlock</button>
+    <div class="lock-error" id="pw-error"></div>
+  </div>
+</div>
+
+<!-- HOME -->
+<div id="home" class="page">
+  <div class="home-header">
+    <div class="home-title">🚒 Maintenance Log</div>
+    <div class="home-sub">Select a unit or station to view its issue log</div>
+  </div>
+
+  <div class="section-label">Apparatus</div>
+  <div class="tile-grid" id="vehicle-tiles"></div>
+
+  <div class="section-label">Stations</div>
+  <div class="tile-grid" id="station-tiles"></div>
+</div>
+
+<!-- LOG PAGE -->
+<div id="log-page" class="page">
+  <div class="log-header">
+    <div class="log-title-wrap">
+      <button class="back-btn" onclick="goHome()">← Back</button>
+      <div>
+        <div class="log-title" id="log-title"></div>
+        <div class="log-sub" id="log-sub"></div>
+      </div>
+    </div>
+    <div class="log-actions">
+      <div class="sync-status"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">Loading...</span></div>
+      <button class="btn btn-ghost" onclick="shareLog()">↗ Share</button>
+      <button class="btn btn-ghost" onclick="printList()">🖨 Print</button>
+      <button class="btn btn-primary" onclick="toggleForm()">+ Add Issue</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card"><div class="stat-num" id="stat-total">—</div><div class="stat-label">Total</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-open">—</div><div class="stat-label">Open</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-high">—</div><div class="stat-label">High</div></div>
+    <div class="stat-card"><div class="stat-num red" id="stat-oos">—</div><div class="stat-label">Out of Service</div></div>
+  </div>
+
+  <div class="form-card" id="add-form">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date Reported</label>
+        <input type="date" id="f-date">
+      </div>
+      <div class="form-group">
+        <label>Severity</label>
+        <select id="f-priority">
+          <option value="oos">Out of Service</option>
+          <option value="high">High</option>
+          <option value="medium" selected>Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="f-desc" placeholder="Describe the issue..."></textarea>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="toggleForm()">Cancel</button>
+      <button class="btn btn-primary" onclick="addIssue()">Log Issue</button>
+    </div>
+  </div>
+
+  <div class="filter-row">
+    <button class="filter-chip active" onclick="setFilter('all',this)">All</button>
+    <button class="filter-chip" onclick="setFilter('open',this)">Open</button>
+    <button class="filter-chip" onclick="setFilter('resolved',this)">Resolved</button>
+    <button class="filter-chip" onclick="setFilter('high',this)">High</button>
+    <button class="filter-chip" onclick="setFilter('oos',this)">Out of Service</button>
+  </div>
+
+  <div class="issue-list" id="issue-list">
+    <div class="loading"><div class="spinner"></div>Loading...</div>
+  </div>
+</div>
+
+<!-- PRINT OUTPUT -->
+<div id="print-section"></div>
+
+<script>
+  const PASSWORD = 'fire5151';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbykIiFOAD705E3FjR85TWj5jq2ZJVhxuik_T5GT9ZTRLfQBujwnn6wLrltUzl9RVdyf/exec';
+  const SEV_LABELS = { oos: 'Out of Service', high: 'High', medium: 'Medium', low: 'Low' };
+
+  const UNITS = [
+    { id: 'engine1',  name: 'Engine 1',   icon: '🚒', type: 'vehicle', typeLabel: 'Apparatus' },
+    { id: 'engine2',  name: 'Engine 2',   icon: '🚒', type: 'vehicle', typeLabel: 'Apparatus' },
+    { id: 'engine3',  name: 'Engine 3',   icon: '🚒', type: 'vehicle', typeLabel: 'Apparatus' },
+    { id: 'engine5',  name: 'Engine 5',   icon: '🚒', type: 'vehicle', typeLabel: 'Apparatus' },
+    { id: 'ladder1',  name: 'Ladder 1',   icon: '🪜', type: 'vehicle', typeLabel: 'Apparatus' },
+    { id: 'station1', name: 'Station 1',  icon: '🏠', type: 'station', typeLabel: 'Building' },
+    { id: 'station2', name: 'Station 2',  icon: '🏠', type: 'station', typeLabel: 'Building' },
+    { id: 'station3', name: 'Station 3',  icon: '🏠', type: 'station', typeLabel: 'Building' },
+    { id: 'station5', name: 'Station 5',  icon: '🏠', type: 'station', typeLabel: 'Building' },
+  ];
+
+  let issues = [];
+  let filter = 'all';
+  let saving = false;
+  let currentUnit = null;
+  let tileCounts = {};
+
+  // ── AUTH ──
+  function unlock() {
+    const val = document.getElementById('pw-input').value;
+    const inp = document.getElementById('pw-input');
+    const err = document.getElementById('pw-error');
+    if (val === PASSWORD) {
+      document.getElementById('lock-screen').style.display = 'none';
+      showPage('home');
+      loadAllCounts();
+    } else {
+      inp.classList.add('error');
+      err.textContent = 'Incorrect password. Try again.';
+      inp.value = '';
+      setTimeout(() => { inp.classList.remove('error'); err.textContent = ''; }, 2500);
+    }
+  }
+
+  // ── PAGES ──
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function goHome() {
+    showPage('home');
+    loadAllCounts();
+  }
+
+  // ── HOME TILES ──
+  function buildTiles() {
+    const vehicles = UNITS.filter(u => u.type === 'vehicle');
+    const stations = UNITS.filter(u => u.type === 'station');
+    document.getElementById('vehicle-tiles').innerHTML = vehicles.map(u => tileHTML(u)).join('');
+    document.getElementById('station-tiles').innerHTML = stations.map(u => tileHTML(u)).join('');
+  }
+
+  function tileHTML(u) {
+    const c = tileCounts[u.id] || { open: 0, oos: 0 };
+    const badge = c.oos > 0
+      ? `<div class="tile-count"><span>${c.oos}</span> out of service</div>`
+      : c.open > 0
+        ? `<div class="tile-count"><span>${c.open}</span> open issue${c.open !== 1 ? 's' : ''}</div>`
+        : `<div class="tile-count" style="color:#aaa;">No open issues</div>`;
+    return `<div class="tile ${u.type}" onclick="openUnit('${u.id}')">
+      <div class="tile-icon">${u.icon}</div>
+      <div class="tile-name">${u.name}</div>
+      <div class="tile-type">${u.typeLabel}</div>
+      ${badge}
+    </div>`;
+  }
+
+  async function loadAllCounts() {
+    try {
+      const res = await fetch(API_URL + '?action=getAllCounts');
+      const data = await res.json();
+      tileCounts = data.counts || {};
+    } catch(e) { tileCounts = {}; }
+    buildTiles();
+  }
+
+  // ── OPEN UNIT ──
+  function openUnit(unitId) {
+    currentUnit = UNITS.find(u => u.id === unitId);
+    filter = 'all';
+    document.querySelectorAll('.filter-chip').forEach((b, i) => b.classList.toggle('active', i === 0));
+    document.getElementById('log-title').textContent = currentUnit.icon + ' ' + currentUnit.name;
+    document.getElementById('log-sub').textContent = currentUnit.typeLabel + ' Maintenance Log';
+    document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('add-form').classList.remove('open');
+    document.getElementById('f-desc').value = '';
+    showPage('log-page');
+    loadFromSheet();
+  }
+
+  // ── SYNC STATUS ──
+  function setSyncStatus(state, text) {
+    document.getElementById('sync-dot').className = 'sync-dot ' + state;
+    document.getElementById('sync-label').textContent = text;
+  }
+
+  // ── SHEET OPS ──
+  async function loadFromSheet() {
+    document.getElementById('issue-list').innerHTML = '<div class="loading"><div class="spinner"></div>Loading from Google Sheets...</div>';
+    setSyncStatus('saving', 'Loading...');
+    try {
+      const res = await fetch(`${API_URL}?action=getAll&sheet=${currentUnit.id}`);
+      const data = await res.json();
+      issues = (data.issues || []).map(i => ({ ...i, id: Number(i.id) }));
+      setSyncStatus('ok', 'Synced');
+      render();
+    } catch(e) {
+      setSyncStatus('error', 'Could not connect');
+      document.getElementById('issue-list').innerHTML =
+        '<div class="empty"><div class="empty-icon">⚠️</div>Could not load from Google Sheets.<br>Check your connection and try again.</div>';
+    }
+  }
+
+  async function saveToSheet() {
+    if (saving) return;
+    saving = true;
+    setSyncStatus('saving', 'Saving...');
+    try {
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'save', sheet: currentUnit.id, issues })
+      });
+      setSyncStatus('ok', 'Saved ✓');
+    } catch(e) {
+      setSyncStatus('error', 'Save failed');
+    }
+    saving = false;
+  }
+
+  // ── FORM ──
+  function toggleForm() {
+    document.getElementById('add-form').classList.toggle('open');
+  }
+
+  function setFilter(f, btn) {
+    filter = f;
+    document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  function addIssue() {
+    const desc = document.getElementById('f-desc').value.trim();
+    if (!desc) { document.getElementById('f-desc').focus(); return; }
+    issues.unshift({
+      id: Date.now(),
+      date: document.getElementById('f-date').value,
+      priority: document.getElementById('f-priority').value,
+      description: desc,
+      status: 'open'
+    });
+    document.getElementById('f-desc').value = '';
+    document.getElementById('f-priority').value = 'medium';
+    document.getElementById('add-form').classList.remove('open');
+    render();
+    saveToSheet();
+  }
+
+  function resolve(id) {
+    const i = issues.find(x => x.id === id);
+    if (i) { i.status = i.status === 'resolved' ? 'open' : 'resolved'; render(); saveToSheet(); }
+  }
+
+  function archive(id) {
+    const i = issues.find(x => x.id === id);
+    if (i) { i.status = 'archived'; render(); saveToSheet(); }
+  }
+
+  function deleteIssue(id) {
+    if (!confirm('Delete this issue permanently?')) return;
+    issues = issues.filter(x => x.id !== id);
+    render(); saveToSheet();
+  }
+
+  function getVisible() {
+    return issues.filter(i => {
+      if (filter === 'all') return i.status !== 'archived';
+      if (filter === 'open') return i.status === 'open';
+      if (filter === 'resolved') return i.status === 'resolved';
+      if (filter === 'high') return i.priority === 'high' && i.status !== 'archived';
+      if (filter === 'oos') return i.priority === 'oos' && i.status !== 'archived';
+      return true;
+    });
+  }
+
+  // ── SHARE ──
+  async function shareLog() {
+    const title = currentUnit.name + ' — Maintenance Log';
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, url });
+      } catch(e) { /* cancelled */ }
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        const btn = document.querySelector('.log-actions .btn-ghost');
+        const orig = btn.textContent;
+        btn.textContent = '✓ Link copied';
+        setTimeout(() => btn.textContent = orig, 2000);
+      } catch(e) {
+        prompt('Copy this link:', url);
+      }
+    }
+  }
+
+  // ── PRINT ──
+  function printList() {
+    const visible = getVisible();
+    const filterLabel = { all:'All Issues', open:'Open Issues', resolved:'Resolved Issues', high:'High Severity', oos:'Out of Service' }[filter];
+    const now = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+    const rows = visible.length
+      ? visible.map((i, idx) => `<tr>
+          <td>${idx+1}</td>
+          <td>${i.date||'N/A'}</td>
+          <td>${i.description}</td>
+          <td>${SEV_LABELS[i.priority]||i.priority}</td>
+          <td>${i.status.charAt(0).toUpperCase()+i.status.slice(1)}</td>
+        </tr>`).join('')
+      : `<tr><td colspan="5" style="text-align:center;color:#888;">No issues.</td></tr>`;
+
+    const section = document.getElementById('print-section');
+    section.innerHTML = `
+      <h1 style="font-size:18px;font-weight:700;margin:0 0 4px;font-family:Arial,sans-serif;">${currentUnit.icon} ${currentUnit.name} — Deficiency Report</h1>
+      <div style="font-size:12px;color:#666;margin-bottom:20px;font-family:Arial,sans-serif;">Filter: ${filterLabel} &nbsp;|&nbsp; Printed: ${now} &nbsp;|&nbsp; ${visible.length} issue(s)</div>
+      <table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif;">
+        <thead><tr>
+          <th style="background:#f0f0f0;text-align:left;padding:8px 10px;font-size:12px;border-bottom:2px solid #ccc;">#</th>
+          <th style="background:#f0f0f0;text-align:left;padding:8px 10px;font-size:12px;border-bottom:2px solid #ccc;">Date</th>
+          <th style="background:#f0f0f0;text-align:left;padding:8px 10px;font-size:12px;border-bottom:2px solid #ccc;">Description</th>
+          <th style="background:#f0f0f0;text-align:left;padding:8px 10px;font-size:12px;border-bottom:2px solid #ccc;">Severity</th>
+          <th style="background:#f0f0f0;text-align:left;padding:8px 10px;font-size:12px;border-bottom:2px solid #ccc;">Status</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div style="margin-top:28px;font-size:11px;color:#999;border-top:1px solid #ddd;padding-top:8px;font-family:Arial,sans-serif;">${currentUnit.name} Maintenance Log — ${now}</div>`;
+    window.print();
+    setTimeout(() => section.innerHTML = '', 1000);
+  }
+
+  // ── RENDER ──
+  function render() {
+    const visible = getVisible();
+    document.getElementById('stat-total').textContent = issues.filter(i => i.status !== 'archived').length;
+    document.getElementById('stat-open').textContent = issues.filter(i => i.status === 'open').length;
+    document.getElementById('stat-high').textContent = issues.filter(i => i.priority === 'high' && i.status === 'open').length;
+    document.getElementById('stat-oos').textContent = issues.filter(i => i.priority === 'oos' && i.status === 'open').length;
+
+    const list = document.getElementById('issue-list');
+    if (!visible.length) {
+      list.innerHTML = '<div class="empty"><div class="empty-icon">🔧</div>No issues to display.</div>';
+      return;
+    }
+    list.innerHTML = visible.map(i => `
+      <div class="issue-card ${i.priority==='oos'?'oos':''} ${i.status==='resolved'?'resolved':''}">
+        <div class="issue-top">
+          <span class="issue-desc">${i.description}</span>
+          <div class="badges">
+            <span class="badge badge-${i.priority}">${SEV_LABELS[i.priority]||i.priority}</span>
+            <span class="badge badge-${i.status}">${i.status.charAt(0).toUpperCase()+i.status.slice(1)}</span>
+          </div>
+        </div>
+        <div class="issue-meta">Reported: ${i.date||'N/A'}</div>
+        <div class="issue-actions">
+          <button class="act-btn" onclick="resolve(${i.id})">${i.status==='resolved'?'Reopen':'Mark Resolved'}</button>
+          <button class="act-btn" onclick="archive(${i.id})">Archive</button>
+          <button class="act-btn danger" onclick="deleteIssue(${i.id})">Delete</button>
+        </div>
+      </div>`).join('');
+  }
+
+  document.getElementById('pw-input').focus();
+</script>
+</body>
+</html>
