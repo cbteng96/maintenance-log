@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fire Engine 5 — Mechanical Issue Log</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red: #C0392B;
+      --red-light: #FDEDEC;
+      --red-mid: #E74C3C;
+      --amber: #E67E22;
+      --amber-light: #FEF9E7;
+      --blue: #2471A3;
+      --blue-light: #EBF5FB;
+      --gray: #566573;
+      --gray-light: #F4F6F7;
+      --green: #1E8449;
+      --green-light: #EAFAF1;
+      --border: #E5E8EC;
+      --text: #1a1a2e;
+      --text-muted: #7f8c8d;
+      --bg: #F7F8FA;
+      --white: #ffffff;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --radius: 10px;
+      --font: 'DM Sans', sans-serif;
+      --mono: 'DM Mono', monospace;
+    }
+
+    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; line-height: 1.5; }
+
+    /* LOCK */
+    #lock-screen { position: fixed; inset: 0; background: #1a1a2e; display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .lock-box { background: var(--white); border-radius: 16px; padding: 40px 36px; width: 100%; max-width: 360px; text-align: center; box-shadow: var(--shadow-md); }
+    .lock-icon { width: 52px; height: 52px; background: #FDEDEC; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 22px; }
+    .lock-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+    .lock-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+    .lock-input { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius); font-family: var(--mono); font-size: 14px; letter-spacing: 2px; color: var(--text); outline: none; transition: border-color 0.2s; margin-bottom: 12px; }
+    .lock-input:focus { border-color: var(--red); }
+    .lock-input.error { border-color: var(--red-mid); background: var(--red-light); }
+    .lock-btn { width: 100%; padding: 10px; background: var(--red); color: white; border: none; border-radius: var(--radius); font-family: var(--font); font-size: 14px; font-weight: 500; cursor: pointer; }
+    .lock-btn:hover { background: #a93226; }
+    .lock-error { font-size: 12px; color: var(--red-mid); margin-top: 8px; min-height: 16px; }
+
+    /* APP */
+    #app { display: none; max-width: 820px; margin: 0 auto; padding: 32px 20px 60px; }
+    .app-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; gap: 12px; }
+    .app-title { font-size: 22px; font-weight: 600; }
+    .app-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+    .header-btns { display: flex; gap: 8px; flex-shrink: 0; align-items: center; }
+
+    .btn { padding: 8px 16px; border-radius: var(--radius); font-family: var(--font); font-size: 13px; font-weight: 500; cursor: pointer; border: 1.5px solid var(--border); background: var(--white); color: var(--text); transition: all 0.15s; }
+    .btn:hover { background: var(--gray-light); }
+    .btn-primary { background: var(--red); color: white; border-color: var(--red); }
+    .btn-primary:hover { background: #a93226; border-color: #a93226; }
+    .btn-ghost { background: transparent; border-color: var(--border); color: var(--text-muted); }
+    .btn-ghost:hover { background: var(--gray-light); color: var(--text); }
+
+    .sync-status { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+    .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; flex-shrink: 0; }
+    .sync-dot.ok { background: var(--green); }
+    .sync-dot.saving { background: var(--amber); }
+    .sync-dot.error { background: var(--red); }
+
+    /* STATS */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+    .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); }
+    .stat-num { font-size: 26px; font-weight: 600; color: var(--text); line-height: 1; }
+    .stat-num.red { color: var(--red); }
+    .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* FORM */
+    .form-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); display: none; }
+    .form-card.open { display: block; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-group input, .form-group select, .form-group textarea { padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-family: var(--font); font-size: 13px; color: var(--text); background: var(--white); outline: none; transition: border-color 0.2s; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--red); }
+    .form-group textarea { resize: vertical; min-height: 72px; }
+    .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+
+    /* FILTERS */
+    .filter-row { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filter-chip { padding: 5px 13px; border-radius: 99px; border: 1.5px solid var(--border); background: var(--white); font-family: var(--font); font-size: 12px; color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
+    .filter-chip:hover { border-color: #bbb; color: var(--text); }
+    .filter-chip.active { background: var(--text); color: white; border-color: var(--text); }
+
+    /* ISSUES */
+    .issue-list { display: flex; flex-direction: column; gap: 10px; }
+    .issue-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); transition: box-shadow 0.15s; }
+    .issue-card:hover { box-shadow: var(--shadow-md); }
+    .issue-card.oos { border-left: 3px solid var(--red); }
+    .issue-card.resolved { opacity: 0.55; }
+    .issue-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .issue-desc { font-size: 14px; font-weight: 500; color: var(--text); flex: 1; }
+    .badges { display: flex; gap: 6px; flex-shrink: 0; }
+    .badge { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 99px; }
+    .badge-oos { background: var(--red-light); color: var(--red); }
+    .badge-high { background: var(--amber-light); color: var(--amber); }
+    .badge-medium { background: var(--blue-light); color: var(--blue); }
+    .badge-low { background: var(--gray-light); color: var(--gray); }
+    .badge-open { background: var(--amber-light); color: var(--amber); }
+    .badge-resolved { background: var(--green-light); color: var(--green); }
+    .issue-meta { font-size: 12px; color: var(--text-muted); margin-top: 6px; font-family: var(--mono); }
+    .issue-actions { display: flex; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .act-btn { font-size: 11px; font-weight: 500; padding: 4px 11px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; font-family: var(--font); transition: all 0.15s; }
+    .act-btn:hover { background: var(--gray-light); color: var(--text); }
+    .act-btn.danger { color: var(--red); border-color: #f5c6c6; }
+    .act-btn.danger:hover { background: var(--red-light); }
+
+    .empty { text-align: center; padding: 48px 20px; color: var(--text-muted); font-size: 14px; background: var(--white); border: 1px dashed var(--border); border-radius: var(--radius); }
+    .empty-icon { font-size: 32px; margin-bottom: 10px; }
+    .loading { text-align: center; padding: 48px 20px; color: var(--text-muted); font-size: 14px; }
+    .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--red); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* PRINT */
+    #print-section { display: none; }
+    @media print {
+      body { background: white; font-family: Arial, sans-serif; font-size: 13px; color: #111; }
+      #lock-screen, #app { display: none !important; }
+      #print-section { display: block !important; }
+      td { padding: 8px 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+      @page { margin: 2cm; }
+    }
+
+    @media (max-width: 600px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .form-row { grid-template-columns: 1fr; }
+      .app-title { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="lock-screen">
+  <div class="lock-box">
+    <div class="lock-icon">🔒</div>
+    <div class="lock-title">Fire Engine 5</div>
+    <div class="lock-sub">Enter password to access the issue log</div>
+    <input type="password" class="lock-input" id="pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')unlock()">
+    <button class="lock-btn" onclick="unlock()">Unlock</button>
+    <div class="lock-error" id="pw-error"></div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="app-header">
+    <div>
+      <div class="app-title">🚒 Fire Engine 5</div>
+      <div class="app-sub">Mechanical Issue Log</div>
+    </div>
+    <div class="header-btns">
+      <div class="sync-status"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">Loading...</span></div>
+      <button class="btn btn-ghost" onclick="printList()">🖨 Print</button>
+      <button class="btn btn-primary" onclick="toggleForm()">+ Add Issue</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card"><div class="stat-num" id="stat-total">—</div><div class="stat-label">Total Issues</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-open">—</div><div class="stat-label">Open</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-high">—</div><div class="stat-label">High Severity</div></div>
+    <div class="stat-card"><div class="stat-num red" id="stat-oos">—</div><div class="stat-label">Out of Service</div></div>
+  </div>
+
+  <div class="form-card" id="add-form">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date Reported</label>
+        <input type="date" id="f-date">
+      </div>
+      <div class="form-group">
+        <label>Severity</label>
+        <select id="f-priority">
+          <option value="oos">Out of Service</option>
+          <option value="high">High</option>
+          <option value="medium" selected>Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="f-desc" placeholder="Describe the mechanical issue..."></textarea>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="toggleForm()">Cancel</button>
+      <button class="btn btn-primary" onclick="addIssue()">Log Issue</button>
+    </div>
+  </div>
+
+  <div class="filter-row">
+    <button class="filter-chip active" onclick="setFilter('all',this)">All</button>
+    <button class="filter-chip" onclick="setFilter('open',this)">Open</button>
+    <button class="filter-chip" onclick="setFilter('resolved',this)">Resolved</button>
+    <button class="filter-chip" onclick="setFilter('high',this)">High Severity</button>
+    <button class="filter-chip" onclick="setFilter('oos',this)">Out of Service</button>
+  </div>
+
+  <div class="issue-list" id="issue-list">
+    <div class="loading"><div class="spinner"></div>Loading issues from Google Sheets...</div>
+  </div>
+</div>
+
+<div id="print-section"></div>
+
+<script>
+  const PASSWORD = 'fire5151';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbykIiFOAD705E3FjR85TWj5jq2ZJVhxuik_T5GT9ZTRLfQBujwnn6wLrltUzl9RVdyf/exec';
+  const SEV_LABELS = { oos: 'Out of Service', high: 'High', medium: 'Medium', low: 'Low' };
+  let issues = [];
+  let filter = 'all';
+  let saving = false;
+
+  function unlock() {
+    const val = document.getElementById('pw-input').value;
+    const err = document.getElementById('pw-error');
+    const inp = document.getElementById('pw-input');
+    if (val === PASSWORD) {
+      document.getElementById('lock-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+      loadFromSheet();
+    } else {
+      inp.classList.add('error');
+      err.textContent = 'Incorrect password. Try again.';
+      inp.value = '';
+      setTimeout(() => { inp.classList.remove('error'); err.textContent = ''; }, 2500);
+    }
+  }
+
+  function setSyncStatus(state, text) {
+    document.getElementById('sync-dot').className = 'sync-dot ' + state;
+    document.getElementById('sync-label').textContent = text;
+  }
+
+  async function loadFromSheet() {
+    setSyncStatus('saving', 'Loading...');
+    try {
+      const res = await fetch(API_URL + '?action=getAll');
+      const data = await res.json();
+      issues = (data.issues || []).map(i => ({ ...i, id: Number(i.id) }));
+      setSyncStatus('ok', 'Synced');
+      render();
+    } catch(e) {
+      setSyncStatus('error', 'Could not connect');
+      document.getElementById('issue-list').innerHTML =
+        '<div class="empty"><div class="empty-icon">⚠️</div>Could not load from Google Sheets.<br>Check your internet connection.</div>';
+    }
+  }
+
+  async function saveToSheet() {
+    if (saving) return;
+    saving = true;
+    setSyncStatus('saving', 'Saving...');
+    try {
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'save', issues })
+      });
+      setSyncStatus('ok', 'Saved ✓');
+    } catch(e) {
+      setSyncStatus('error', 'Save failed');
+    }
+    saving = false;
+  }
+
+  function toggleForm() {
+    document.getElementById('add-form').classList.toggle('open');
+  }
+
+  function setFilter(f, btn) {
+    filter = f;
+    document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  function addIssue() {
+    const desc = document.getElementById('f-desc').value.trim();
+    if (!desc) { document.getElementById('f-desc').focus(); return; }
+    issues.unshift({
+      id: Date.now(),
+      date: document.getElementById('f-date').value,
+      priority: document.getElementById('f-priority').value,
+      description: desc,
+      status: 'open'
+    });
+    document.getElementById('f-desc').value = '';
+    document.getElementById('f-priority').value = 'medium';
+    document.getElementById('add-form').classList.remove('open');
+    render();
+    saveToSheet();
+  }
+
+  function resolve(id) {
+    const i = issues.find(x => x.id === id);
+    if (i) { i.status = i.status === 'resolved' ? 'open' : 'resolved'; render(); saveToSheet(); }
+  }
+
+  function archive(id) {
+    const i = issues.find(x => x.id === id);
+    if (i) { i.status = 'archived'; render(); saveToSheet(); }
+  }
+
+  function deleteIssue(id) {
+    if (!confirm('Delete this issue permanently?')) return;
+    issues = issues.filter(x => x.id !== id);
+    render(); saveToSheet();
+  }
+
+  function getVisible() {
+    return issues.filter(i => {
+      if (filter === 'all') return i.status !== 'archived';
+      if (filter === 'open') return i.status === 'open';
+      if (filter === 'resolved') return i.status === 'resolved';
+      if (filter === 'high') return i.priority === 'high' && i.status !== 'archived';
+      if (filter === 'oos') return i.priority === 'oos' && i.status !== 'archived';
+      return true;
+    });
+  }
+
+  function printList() {
+    const visible = getVisible();
+    const filterLabel = { all:'All Issues', open:'Open Issues', resolved:'Resolved Issues', high:'High Severity Issues', oos:'Out of Service Issues' }[filter];
+    const now = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+    const rows = visible.length
+      ? visible.map((i, idx) => `<tr>
+          <td>${idx+1}</td>
+          <td>${i.date||'N/A'}</td>
+          <td>${i.description}</td>
+          <td>${SEV_LABELS[i.priority]||i.priority}</td>
+          <td>${i.status.charAt(0).toUpperCase()+i.status.slice(1)}</td>
+        </tr>`).join('')
+      : `<tr><td colspan="5" style="text-align:center;color:#888;">No issues.</td></tr>`;
+
+    const section = document.getElementById('print-section');
+    section.innerHTML = `
+      <h1 style="font-size:18px;font-weight:700;margin:0 0 4px;font-family:Arial,sans-serif;">🚒 Fire Engine 5 — Deficiency Report</h1>
+      <div style="font-size:12px;color:#666;margin-bottom:20px;font-family:Arial,sans-serif;">Filter: ${filterLabel} &nbsp;|&nbsp; Printed: ${now} &nbsp;|&nbsp; ${visible.length} issue(s)</div>
+      <table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif;">
+        <thead><tr>
+          <th style="background:#f0f0f0;text-align:left;padding:8px 10px;font-size:12px;border-bottom:2px solid #ccc;">#</th>
+          <th style="background:#f0f0f0;text-align:left;padding:8px 10px;font-size:12px;border-bottom:2px solid #ccc;">Date Reported</th>
+          <th style="background:#f0f0f0;text-align:left;padding:8px 10px;font-size:12px;border-bottom:2px solid #ccc;">Description</th>
+          <th style="background:#f0f0f0;text-align:left;padding:8px 10px;font-size:12px;border-bottom:2px solid #ccc;">Severity</th>
+          <th style="background:#f0f0f0;text-align:left;padding:8px 10px;font-size:12px;border-bottom:2px solid #ccc;">Status</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div style="margin-top:28px;font-size:11px;color:#999;border-top:1px solid #ddd;padding-top:8px;font-family:Arial,sans-serif;">Fire Engine 5 Mechanical Issue Log — ${now}</div>`;
+    window.print();
+    setTimeout(() => section.innerHTML = '', 1000);
+  }
+
+  function render() {
+    const visible = getVisible();
+    document.getElementById('stat-total').textContent = issues.filter(i => i.status !== 'archived').length;
+    document.getElementById('stat-open').textContent = issues.filter(i => i.status === 'open').length;
+    document.getElementById('stat-high').textContent = issues.filter(i => i.priority === 'high' && i.status === 'open').length;
+    document.getElementById('stat-oos').textContent = issues.filter(i => i.priority === 'oos' && i.status === 'open').length;
+
+    const list = document.getElementById('issue-list');
+    if (!visible.length) {
+      list.innerHTML = '<div class="empty"><div class="empty-icon">🔧</div>No issues to display.</div>';
+      return;
+    }
+    list.innerHTML = visible.map(i => `
+      <div class="issue-card ${i.priority==='oos'?'oos':''} ${i.status==='resolved'?'resolved':''}">
+        <div class="issue-top">
+          <span class="issue-desc">${i.description}</span>
+          <div class="badges">
+            <span class="badge badge-${i.priority}">${SEV_LABELS[i.priority]||i.priority}</span>
+            <span class="badge badge-${i.status}">${i.status.charAt(0).toUpperCase()+i.status.slice(1)}</span>
+          </div>
+        </div>
+        <div class="issue-meta">Reported: ${i.date||'N/A'}</div>
+        <div class="issue-actions">
+          <button class="act-btn" onclick="resolve(${i.id})">${i.status==='resolved'?'Reopen':'Mark Resolved'}</button>
+          <button class="act-btn" onclick="archive(${i.id})">Archive</button>
+          <button class="act-btn danger" onclick="deleteIssue(${i.id})">Delete</button>
+        </div>
+      </div>`).join('');
+  }
+
+  document.getElementById('pw-input').focus();
+</script>
+</body>
+</html>
