@@ -13,7 +13,7 @@
       --blue: #2471A3; --blue-light: #EBF5FB;
       --gray: #566573; --gray-light: #F4F6F7;
       --green: #1E8449; --green-light: #EAFAF1;
-      --navy: #1a1a2e; --navy-mid: #2c2c4a;
+      --navy: #1a1a2e;
       --border: #E5E8EC; --text: #1a1a2e; --text-muted: #7f8c8d;
       --bg: #F7F8FA; --white: #ffffff;
       --shadow: 0 1px 3px rgba(0,0,0,0.08); --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
@@ -21,7 +21,7 @@
     }
     body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; line-height: 1.5; }
 
-    /* ── LOCK ── */
+    /* LOCK */
     #lock-screen { position: fixed; inset: 0; background: var(--navy); display: flex; align-items: center; justify-content: center; z-index: 1000; }
     .lock-box { background: var(--white); border-radius: 16px; padding: 40px 36px; width: 100%; max-width: 360px; text-align: center; box-shadow: var(--shadow-md); }
     .lock-icon { width: 56px; height: 56px; background: var(--red-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 24px; }
@@ -30,51 +30,48 @@
     .lock-input { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius); font-family: var(--mono); font-size: 15px; letter-spacing: 3px; color: var(--text); outline: none; transition: border-color 0.2s; margin-bottom: 12px; }
     .lock-input:focus { border-color: var(--red); }
     .lock-input.error { border-color: var(--red-mid); background: var(--red-light); }
-    .lock-btn { width: 100%; padding: 11px; background: var(--red); color: white; border: none; border-radius: var(--radius); font-family: var(--font); font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+    .lock-btn { width: 100%; padding: 11px; background: var(--red); color: white; border: none; border-radius: var(--radius); font-family: var(--font); font-size: 14px; font-weight: 500; cursor: pointer; }
     .lock-btn:hover { background: #a93226; }
     .lock-error { font-size: 12px; color: var(--red-mid); margin-top: 8px; min-height: 16px; }
 
-    /* ── PAGES ── */
+    /* PAGES */
     .page { display: none; }
     .page.active { display: block; }
 
-    /* ── HOME ── */
+    /* HOME */
     #home { max-width: 900px; margin: 0 auto; padding: 36px 20px 60px; }
     .home-header { margin-bottom: 36px; }
     .home-title { font-size: 26px; font-weight: 600; }
     .home-sub { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
     .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px; }
-    .tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 36px; }
-    .tile {
-      background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 20px 18px; cursor: pointer; transition: all 0.15s; box-shadow: var(--shadow);
-      display: flex; flex-direction: column; gap: 6px;
-    }
+    .tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 12px; margin-bottom: 36px; }
+    .tile { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 18px; cursor: pointer; transition: all 0.15s; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 4px; }
     .tile:hover { box-shadow: var(--shadow-md); border-color: #ccc; transform: translateY(-1px); }
-    .tile-icon { font-size: 26px; margin-bottom: 4px; }
-    .tile-name { font-size: 15px; font-weight: 600; color: var(--text); }
-    .tile-type { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .tile-count { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-    .tile-count span { font-weight: 600; color: var(--red); }
-    .tile.station { border-left: 3px solid var(--blue); }
     .tile.vehicle { border-left: 3px solid var(--red); }
+    .tile.station { border-left: 3px solid var(--blue); }
+    .tile-icon { font-size: 26px; margin-bottom: 4px; }
+    .tile-name { font-size: 15px; font-weight: 600; }
+    .tile-type { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .tile-count { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+    .tile-count .oos-num { font-weight: 600; color: var(--red); }
+    .tile-count .open-num { font-weight: 600; color: var(--amber); }
 
-    /* ── LOG PAGE ── */
+    /* LOG PAGE */
     #log-page { max-width: 860px; margin: 0 auto; padding: 28px 20px 60px; }
-    .log-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; gap: 12px; }
+    .log-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; gap: 12px; flex-wrap: wrap; }
     .log-title-wrap { display: flex; align-items: center; gap: 12px; }
     .back-btn { background: transparent; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 7px 12px; font-family: var(--font); font-size: 13px; color: var(--text-muted); cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
     .back-btn:hover { background: var(--gray-light); color: var(--text); }
     .log-title { font-size: 20px; font-weight: 600; }
     .log-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
-    .log-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+    .log-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .sync-status { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
     .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; flex-shrink: 0; }
     .sync-dot.ok { background: var(--green); }
     .sync-dot.saving { background: var(--amber); }
     .sync-dot.error { background: var(--red); }
 
-    /* ── BUTTONS ── */
+    /* BUTTONS */
     .btn { padding: 8px 15px; border-radius: var(--radius); font-family: var(--font); font-size: 13px; font-weight: 500; cursor: pointer; border: 1.5px solid var(--border); background: var(--white); color: var(--text); transition: all 0.15s; }
     .btn:hover { background: var(--gray-light); }
     .btn-primary { background: var(--red); color: white; border-color: var(--red); }
@@ -82,14 +79,14 @@
     .btn-ghost { background: transparent; border-color: var(--border); color: var(--text-muted); }
     .btn-ghost:hover { background: var(--gray-light); color: var(--text); }
 
-    /* ── STATS ── */
+    /* STATS */
     .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
     .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); }
     .stat-num { font-size: 26px; font-weight: 600; color: var(--text); line-height: 1; }
     .stat-num.red { color: var(--red); }
     .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    /* ── FORM ── */
+    /* FORM */
     .form-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 18px; box-shadow: var(--shadow); display: none; }
     .form-card.open { display: block; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
@@ -100,13 +97,13 @@
     .form-group textarea { resize: vertical; min-height: 72px; }
     .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
 
-    /* ── FILTERS ── */
+    /* FILTERS */
     .filter-row { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
     .filter-chip { padding: 5px 13px; border-radius: 99px; border: 1.5px solid var(--border); background: var(--white); font-family: var(--font); font-size: 12px; color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
     .filter-chip:hover { border-color: #bbb; color: var(--text); }
     .filter-chip.active { background: var(--text); color: white; border-color: var(--text); }
 
-    /* ── ISSUES ── */
+    /* ISSUES */
     .issue-list { display: flex; flex-direction: column; gap: 10px; }
     .issue-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); transition: box-shadow 0.15s; }
     .issue-card:hover { box-shadow: var(--shadow-md); }
@@ -135,7 +132,7 @@
     .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--red); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 12px; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── PRINT ── */
+    /* PRINT */
     #print-section { display: none; }
     @media print {
       body { background: white; font-family: Arial, sans-serif; font-size: 13px; color: #111; }
@@ -144,12 +141,9 @@
       td { padding: 8px 10px; border-bottom: 1px solid #eee; vertical-align: top; }
       @page { margin: 2cm; }
     }
-
     @media (max-width: 620px) {
       .stats { grid-template-columns: repeat(2, 1fr); }
       .form-row { grid-template-columns: 1fr; }
-      .log-header { flex-direction: column; gap: 10px; }
-      .log-actions { width: 100%; justify-content: flex-end; }
       .tile-grid { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
@@ -174,10 +168,8 @@
     <div class="home-title">🚒 Maintenance Log</div>
     <div class="home-sub">Select a unit or station to view its issue log</div>
   </div>
-
   <div class="section-label">Apparatus</div>
   <div class="tile-grid" id="vehicle-tiles"></div>
-
   <div class="section-label">Stations</div>
   <div class="tile-grid" id="station-tiles"></div>
 </div>
@@ -194,7 +186,7 @@
     </div>
     <div class="log-actions">
       <div class="sync-status"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">Loading...</span></div>
-      <button class="btn btn-ghost" onclick="shareLog()">↗ Share</button>
+      <button class="btn btn-ghost" id="share-btn" onclick="shareLog()">↗ Share</button>
       <button class="btn btn-ghost" onclick="printList()">🖨 Print</button>
       <button class="btn btn-primary" onclick="toggleForm()">+ Add Issue</button>
     </div>
@@ -246,24 +238,23 @@
   </div>
 </div>
 
-<!-- PRINT OUTPUT -->
 <div id="print-section"></div>
 
 <script>
   const PASSWORD = 'fire5151';
-  const API_URL = 'https://script.google.com/macros/s/AKfycbykIiFOAD705E3FjR85TWj5jq2ZJVhxuik_T5GT9ZTRLfQBujwnn6wLrltUzl9RVdyf/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbwyRHuGk4qnPo91w1YBWKdGuB8dCfuNH1FRrm6NO52hFht9SCLT72qnZr2VD-KN2eTw/exec';
   const SEV_LABELS = { oos: 'Out of Service', high: 'High', medium: 'Medium', low: 'Low' };
 
   const UNITS = [
-    { id: 'engine1',  name: 'Engine 1',   icon: '🚒', type: 'vehicle', typeLabel: 'Apparatus' },
-    { id: 'engine2',  name: 'Engine 2',   icon: '🚒', type: 'vehicle', typeLabel: 'Apparatus' },
-    { id: 'engine3',  name: 'Engine 3',   icon: '🚒', type: 'vehicle', typeLabel: 'Apparatus' },
-    { id: 'engine5',  name: 'Engine 5',   icon: '🚒', type: 'vehicle', typeLabel: 'Apparatus' },
-    { id: 'ladder1',  name: 'Ladder 1',   icon: '🪜', type: 'vehicle', typeLabel: 'Apparatus' },
-    { id: 'station1', name: 'Station 1',  icon: '🏠', type: 'station', typeLabel: 'Building' },
-    { id: 'station2', name: 'Station 2',  icon: '🏠', type: 'station', typeLabel: 'Building' },
-    { id: 'station3', name: 'Station 3',  icon: '🏠', type: 'station', typeLabel: 'Building' },
-    { id: 'station5', name: 'Station 5',  icon: '🏠', type: 'station', typeLabel: 'Building' },
+    { id: 'engine1',  name: 'Engine 1',  icon: '🚒', type: 'vehicle', typeLabel: 'Apparatus' },
+    { id: 'engine2',  name: 'Engine 2',  icon: '🚒', type: 'vehicle', typeLabel: 'Apparatus' },
+    { id: 'engine3',  name: 'Engine 3',  icon: '🚒', type: 'vehicle', typeLabel: 'Apparatus' },
+    { id: 'engine5',  name: 'Engine 5',  icon: '🚒', type: 'vehicle', typeLabel: 'Apparatus' },
+    { id: 'ladder1',  name: 'Ladder 1',  icon: '🪜', type: 'vehicle', typeLabel: 'Apparatus' },
+    { id: 'station1', name: 'Station 1', icon: '🏠', type: 'station', typeLabel: 'Building'  },
+    { id: 'station2', name: 'Station 2', icon: '🏠', type: 'station', typeLabel: 'Building'  },
+    { id: 'station3', name: 'Station 3', icon: '🏠', type: 'station', typeLabel: 'Building'  },
+    { id: 'station5', name: 'Station 5', icon: '🏠', type: 'station', typeLabel: 'Building'  },
   ];
 
   let issues = [];
@@ -271,6 +262,28 @@
   let saving = false;
   let currentUnit = null;
   let tileCounts = {};
+  let cbCounter = 0;
+
+  // ── JSONP (bypasses CORS) ──
+  function jsonpFetch(url) {
+    return new Promise((resolve, reject) => {
+      const cbName = '_cb' + (cbCounter++);
+      const script = document.createElement('script');
+      const timeout = setTimeout(() => {
+        cleanup();
+        reject(new Error('Request timed out'));
+      }, 20000);
+      function cleanup() {
+        clearTimeout(timeout);
+        delete window[cbName];
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+      window[cbName] = function(data) { cleanup(); resolve(data); };
+      script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cbName;
+      script.onerror = () => { cleanup(); reject(new Error('Network error')); };
+      document.head.appendChild(script);
+    });
+  }
 
   // ── AUTH ──
   function unlock() {
@@ -304,32 +317,37 @@
   function buildTiles() {
     const vehicles = UNITS.filter(u => u.type === 'vehicle');
     const stations = UNITS.filter(u => u.type === 'station');
-    document.getElementById('vehicle-tiles').innerHTML = vehicles.map(u => tileHTML(u)).join('');
-    document.getElementById('station-tiles').innerHTML = stations.map(u => tileHTML(u)).join('');
+    document.getElementById('vehicle-tiles').innerHTML = vehicles.map(tileHTML).join('');
+    document.getElementById('station-tiles').innerHTML = stations.map(tileHTML).join('');
   }
 
   function tileHTML(u) {
     const c = tileCounts[u.id] || { open: 0, oos: 0 };
-    const badge = c.oos > 0
-      ? `<div class="tile-count"><span>${c.oos}</span> out of service</div>`
-      : c.open > 0
-        ? `<div class="tile-count"><span>${c.open}</span> open issue${c.open !== 1 ? 's' : ''}</div>`
-        : `<div class="tile-count" style="color:#aaa;">No open issues</div>`;
+    let countHTML = '';
+    if (c.oos > 0) {
+      countHTML = `<div class="tile-count"><span class="oos-num">${c.oos} out of service</span></div>`;
+    } else if (c.open > 0) {
+      countHTML = `<div class="tile-count"><span class="open-num">${c.open}</span> open issue${c.open !== 1 ? 's' : ''}</div>`;
+    } else {
+      countHTML = `<div class="tile-count" style="color:#bbb;">No open issues</div>`;
+    }
     return `<div class="tile ${u.type}" onclick="openUnit('${u.id}')">
       <div class="tile-icon">${u.icon}</div>
       <div class="tile-name">${u.name}</div>
       <div class="tile-type">${u.typeLabel}</div>
-      ${badge}
+      ${countHTML}
     </div>`;
   }
 
   async function loadAllCounts() {
-    try {
-      const res = await fetch(API_URL + '?action=getAllCounts');
-      const data = await res.json();
-      tileCounts = data.counts || {};
-    } catch(e) { tileCounts = {}; }
     buildTiles();
+    try {
+      const data = await jsonpFetch(API_URL + '?action=getAllCounts');
+      tileCounts = data.counts || {};
+      buildTiles();
+    } catch(e) {
+      console.warn('Could not load counts:', e.message);
+    }
   }
 
   // ── OPEN UNIT ──
@@ -342,6 +360,7 @@
     document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('add-form').classList.remove('open');
     document.getElementById('f-desc').value = '';
+    document.getElementById('f-priority').value = 'medium';
     showPage('log-page');
     loadFromSheet();
   }
@@ -352,37 +371,35 @@
     document.getElementById('sync-label').textContent = text;
   }
 
-  // ── SHEET OPS ──
+  // ── LOAD ──
   async function loadFromSheet() {
     document.getElementById('issue-list').innerHTML = '<div class="loading"><div class="spinner"></div>Loading from Google Sheets...</div>';
     setSyncStatus('saving', 'Loading...');
     try {
-      const res = await fetch(`${API_URL}?action=getAll&sheet=${currentUnit.id}`);
-      const data = await res.json();
+      const data = await jsonpFetch(`${API_URL}?action=getAll&sheet=${currentUnit.id}`);
+      if (data.error) throw new Error(data.error);
       issues = (data.issues || []).map(i => ({ ...i, id: Number(i.id) }));
       setSyncStatus('ok', 'Synced');
       render();
     } catch(e) {
       setSyncStatus('error', 'Could not connect');
       document.getElementById('issue-list').innerHTML =
-        '<div class="empty"><div class="empty-icon">⚠️</div>Could not load from Google Sheets.<br>Check your connection and try again.</div>';
+        `<div class="empty"><div class="empty-icon">⚠️</div>Could not load data.<br><small style="color:#aaa;">${e.message}</small></div>`;
     }
   }
 
+  // ── SAVE ──
   async function saveToSheet() {
     if (saving) return;
     saving = true;
     setSyncStatus('saving', 'Saving...');
     try {
-      await fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ action: 'save', sheet: currentUnit.id, issues })
-      });
+      const encoded = encodeURIComponent(JSON.stringify(issues));
+      const data = await jsonpFetch(`${API_URL}?action=save&sheet=${currentUnit.id}&issues=${encoded}`);
+      if (data.error) throw new Error(data.error);
       setSyncStatus('ok', 'Saved ✓');
     } catch(e) {
-      setSyncStatus('error', 'Save failed');
+      setSyncStatus('error', 'Save failed — ' + e.message);
     }
     saving = false;
   }
@@ -447,20 +464,16 @@
   async function shareLog() {
     const title = currentUnit.name + ' — Maintenance Log';
     const url = window.location.href;
+    const btn = document.getElementById('share-btn');
     if (navigator.share) {
-      try {
-        await navigator.share({ title, url });
-      } catch(e) { /* cancelled */ }
+      try { await navigator.share({ title, url }); } catch(e) {}
     } else {
       try {
         await navigator.clipboard.writeText(url);
-        const btn = document.querySelector('.log-actions .btn-ghost');
         const orig = btn.textContent;
-        btn.textContent = '✓ Link copied';
+        btn.textContent = '✓ Copied';
         setTimeout(() => btn.textContent = orig, 2000);
-      } catch(e) {
-        prompt('Copy this link:', url);
-      }
+      } catch(e) { prompt('Copy this link:', url); }
     }
   }
 
@@ -478,7 +491,6 @@
           <td>${i.status.charAt(0).toUpperCase()+i.status.slice(1)}</td>
         </tr>`).join('')
       : `<tr><td colspan="5" style="text-align:center;color:#888;">No issues.</td></tr>`;
-
     const section = document.getElementById('print-section');
     section.innerHTML = `
       <h1 style="font-size:18px;font-weight:700;margin:0 0 4px;font-family:Arial,sans-serif;">${currentUnit.icon} ${currentUnit.name} — Deficiency Report</h1>
